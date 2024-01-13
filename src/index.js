@@ -15,6 +15,3 @@ connectDB().then(() => {
 }
 )
 // thinking to start access and refresh token
-
-// ya wo
-// oo yeah
