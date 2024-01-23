@@ -1,14 +1,8 @@
-import { config } from "dotenv ";
-import express from "express";
+import { config } from "dotenv";
 import connectDB from "./db/index.js";
-
+import { app } from "./app.js"
 // Load environment variables from the .env file
 config();
-
-// Create an instance of the express application
-const app = express();
-
-
 
 // PORT
 const PORT = process.env.PORT || 8080
