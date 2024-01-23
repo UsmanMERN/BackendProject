@@ -24,12 +24,12 @@ const userSchema = new Schema({
         index: true
     },
     avatar: {
-        // type: String, cloudinary url
+        type: String,// cloudinary url
         required: true,
         index: true
     },
     coverImage: {
-        // type: String, cloudinary url
+        type: String,// cloudinary url
         required: true,
     },
     watchHistory: [{
@@ -38,7 +38,7 @@ const userSchema = new Schema({
     }],
     password: {
         type: String,
-        required: [true, 'password is required'],
+        required: true,
     },
     refreshToken: {
         type: String
@@ -68,7 +68,8 @@ userSchema.methods.generateRefreshToken = function () {
     return jwt.sign({
         _id: this._id,
     }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: process.env.REFRESH_TOKEN_EXPiRY
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+
     })
 }
 export const User = mongoose.model("User", userSchema)
