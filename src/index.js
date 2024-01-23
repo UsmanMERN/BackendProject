@@ -20,5 +20,3 @@ connectDB().then(() => {
     })
 }
 )
-
-// ya woo
