@@ -15,14 +15,18 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, `${emptyField} is required!`);
     }
 
-    const existUser = User.findOne({
+    const existUser = await User.findOne({
         $or: [{ userName }, { email }]
     })
     if (existUser) {
         throw new ApiError(409, "User Already Exist!")
     }
+    // console.log(req.files);
+    let coverImageLocalPath;
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    if (req.files && Array.isArray(req.files.coverImage && req.files.coverImage.length > 0)) {
+        coverImageLocalPath = req.files?.coverImage[0]?.path;
+    }
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Upload avatar file")
@@ -42,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
         coverImage: coverImage?.url || "",
         email,
         password,
-        userName: userName.toLowercase()
+        userName: userName.toLowerCase()
     })
 
     const createdUser = await User.findById(user._id).select("-password -refreshToken")
