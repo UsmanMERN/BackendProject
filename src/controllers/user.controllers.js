@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.models.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { deleteUploadedImageFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -171,6 +171,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
+    const oldAvatarImage = req.user?.avatar
+
+    if (oldAvatarImage) {
+        deleteUploadedImageFromCloudinary(oldAvatarImage)
+    }
+
+
     if (!avatar.url) {
         throw new ApiError(400, "Error While uploading avatar!")
     }
@@ -182,6 +189,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.file?.path
 
+    const oldAvatarImage = req.user?.avatar
+
+    if (oldAvatarImage) {
+        deleteUploadedImageFromCloudinary(oldAvatarImage)
+    }
     if (!coverImageLocalPath) {
         throw new ApiError(400, "Avatar not found!")
     }

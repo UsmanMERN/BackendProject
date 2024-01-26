@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs"
+import { ApiError } from './ApiError.js';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -21,4 +22,22 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
-export { uploadOnCloudinary }
+const deleteUploadedImageFromCloudinary = async (uploadedLink) => {
+    try {
+        if (!uploadedLink) {
+            throw new ApiError(400, "Uploaded link not provided.");
+        }
+
+        const result = await cloudinary.uploader.destroy(uploadedLink, { resource_type: 'auto' });
+
+        if (result.result !== 'ok') {
+            throw new ApiError(400, `Error deleting image from Cloudinary: ${result.result}`);
+        }
+
+        console.log(result);
+    } catch (error) {
+        console.error(error.message);
+    }
+};
+
+export { uploadOnCloudinary, deleteUploadedImageFromCloudinary }
