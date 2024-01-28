@@ -9,16 +9,19 @@ import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
-        const user = await User.findById(userId)
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
-        user.refreshToken = refreshToken
-        await user.save({ validateBeforeSave: false })
-        return { accessToken, refreshToken }
+        const user = await User.findById(userId);
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+        // console.log("Existing refreshToken:", user.refreshToken);
+        user.refreshToken = refreshToken;
+        // console.log("New refreshToken:", user.refreshToken);
+        await user.save({ validateBeforeSave: false });
+        return { accessToken, refreshToken };
     } catch (error) {
-        throw new ApiError(500, "someThing went wrong while generating refresh and Access token")
+        throw new ApiError(500, "Something went wrong while generating refresh and access token");
     }
-}
+};
+
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -97,21 +100,25 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async (req, res) => {
     // req.user._id
-    await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: undefined } }, { new: true })
+    await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } }, { new: true })
 
     return res.status(200).clearCookie("accessToken").clearCookie("refreshToken").json(new ApiResponse(200, {}, "user logged Out "))
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken
 
     if (!incomingRefreshToken) {
         throw new ApiError(401, "unauthorized request")
     }
+    // console.log(process.env.REFRESH_TOKEN_SECRET);
+    // console.log(incomingRefreshToken);
     try {
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+        console.log(decodedToken);
         const user = await User.findById(decodedToken?._id)
 
+        // console.log(user);
         if (!user) {
             throw new ApiError(401, "Invalid Refresh token")
         }
@@ -124,8 +131,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             secure: true,
         }
 
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user._id)
-        return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", newRefreshToken, options).json(new ApiResponse(200, { accessToken, refreshToken: newRefreshToken }, "access token refreshed"))
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+        return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json(new ApiResponse(200, { accessToken, refreshToken: refreshToken }, "access token refreshed"))
     } catch (error) {
         console.error(error);
         throw new ApiError(500, error?.message || "something went wrong")
@@ -312,7 +319,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                     {
                         $addFields: {
                             owner: {
-                                $first: "owner"
+                                $arrayElemAt: ["$owner", 0]
                             }
                         }
                     }
@@ -324,7 +331,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, user[0].watchHistory, "user watch History"))
 })
 
-export { getUserChannelProfile,registerUser, loginUser, logoutUser, refreshAccessToken, getWatchHistory, changeCurrentUserPassword, getCurrentUser, updateUserDetails, updateUserAvatar, updateUserCoverImage }
+export { getUserChannelProfile, registerUser, loginUser, logoutUser, refreshAccessToken, getWatchHistory, changeCurrentUserPassword, getCurrentUser, updateUserDetails, updateUserAvatar, updateUserCoverImage }
 
 // ---> steps to follow to register user
 
