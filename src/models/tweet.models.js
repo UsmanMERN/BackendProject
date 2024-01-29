@@ -12,3 +12,4 @@ const TweetSchema = new Schema({
 }, { timestamps: true })
 
 export const Tweet = mongoose.model("Tweet", TweetSchema)
+
