@@ -22,8 +22,6 @@ const generateAccessAndRefreshToken = async (userId) => {
     }
 };
 
-
-
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, userName, email, password } = req.body
     const fields = ["fullName", "email", "userName", "password"];
@@ -332,23 +330,3 @@ const getWatchHistory = asyncHandler(async (req, res) => {
 })
 
 export { getUserChannelProfile, registerUser, loginUser, logoutUser, refreshAccessToken, getWatchHistory, changeCurrentUserPassword, getCurrentUser, updateUserDetails, updateUserAvatar, updateUserCoverImage }
-
-// ---> steps to follow to register user
-
-// get user details from frontend
-// validation
-// check if user already exist
-// check for images/
-// check for avatar
-// upload them to cloudinary
-// create user Object - create entry in Db
-// remove password and refresh fields from response
-// check the user creation
-//  return res
-
-// validate all fields
-// if ([fullName, email, userName, password].some((field) => {
-//     field?.trim() === ""
-// })) {
-//     throw new ApiError(400, "Full Name is Required!")
-// }
