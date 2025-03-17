@@ -1,9 +1,13 @@
 import { config } from "dotenv";
 import connectDB from "./db/index.js";
-import { app } from "./app.js"
+// import { app } from "./app.js"
 // Load environment variables from the .env file
 config();
 
+
+app.get("/", (req, res) => {
+    res.json("Hellow")
+})
 // PORT
 const PORT = process.env.PORT || 8080
 // dataBase is connected
